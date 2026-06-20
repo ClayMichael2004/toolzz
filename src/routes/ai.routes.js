@@ -1,9 +1,8 @@
 import express from "express";
+import { handleAIRequest } from "../controllers/ai.controller";
 
 const router=express.Router();
 
-router.post("/", (req, res)=>{
-    res.json({message: "API route working"});
-});
+router.post("/", handleAIRequest)
 
 export default router;
