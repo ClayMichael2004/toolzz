@@ -1,6 +1,6 @@
-import { commitPrompt } from "./commit.prompt";
-import { errorPrompt } from "./error.prompt";
-import { readmePrompt } from "./readme.prompt";
+import { commitPrompt } from "./commit.prompt.js";
+import { errorPrompt } from "./error.prompt.js";
+import { readmePrompt } from "./readme.prompt.js";
 
 export const buildPrompt = (tool, input)=>{
     switch (tool){

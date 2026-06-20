@@ -1,4 +1,4 @@
-import { generateAIResponse } from "../services/ai.service";
+import { generateAIResponse } from "../services/ai.service.js";
 import { buildPrompt } from "../prompts/index.js";
 
 export const handleAIRequest = async (req, res)=> {
