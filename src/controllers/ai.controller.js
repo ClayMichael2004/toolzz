@@ -1,28 +1,27 @@
 import { generateAIResponse } from "../services/ai.service.js";
 import { buildPrompt } from "../prompts/index.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { successResponse } from "../utils/apiResponse.js";
 
-export const handleAIRequest = async (req, res)=> {
-    try{
+export const handleAIRequest = asyncHandler(
+    async(req, res)=> {
         const {tool, input}= req.body;
 
-        if (!tool || !input){
+        if (!tool ||  !input){
             return res.status(400).json({
-                error: "tool and input are required",
+                success: false,
+                message: "tool and input are required"
             });
         }
-
         const prompt = buildPrompt(tool, input);
 
         const result = await generateAIResponse(prompt);
-
-        res.json({
-            tool,
+        return successResponse(
+            res, "AI response has been generated successfully",
+            {tool,
             result,
-        });
-    }catch (error){
-        res.status(500).json({
-            error: "Server error",
-            details: error.message,
-        });
+        }
+        );
     }
-};
+);
+  

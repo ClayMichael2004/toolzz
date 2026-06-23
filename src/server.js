@@ -3,6 +3,7 @@ dotenv.config();
 import express from "express"
 import cors from "cors"
 import aiRoutes from "./routes/ai.routes.js"
+import errorHandler from "./middleware/error.middleware.js";
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ const app = express();
 app.use(cors());
 app.use(express.json())
 app.use("/api/ai", aiRoutes)
+app.use(errorHandler)
 
 app.get("/", (req, res)=>{
     res.json({message: "Toolzz AI API is running"});
