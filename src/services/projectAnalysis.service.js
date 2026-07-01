@@ -3,6 +3,7 @@ import { buildMetadata } from "../analyzer/metadataBuilder.js";
 import { detectFrameworks } from "../analyzer/frameworkDetector.js";
 import { calculateHealthScore } from "../analyzer/healthScore.js";
 import { detectArchitecture } from "../analyzer/architectureDetector.js";
+import { buildReport } from "../analyzer/reportBuilder.js";
 
 export const analyzeProject = async (projectPath) => {
 
@@ -24,12 +25,15 @@ export const analyzeProject = async (projectPath) => {
 
     // Step 5: Determine architecture (placeholder for now)
     const architecture = detectArchitecture(scanResult);
-    return {
+
+    // Step 6: Build report
+    const report = buildReport({
         scan: scanResult,
         metadata,
         frameworks,
         architecture,
         health
-    };
+    });
 
+    return report;
 };
