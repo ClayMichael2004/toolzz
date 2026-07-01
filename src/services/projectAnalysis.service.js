@@ -2,6 +2,7 @@ import { scanProject } from "../analyzer/projectScanner.js";
 import { buildMetadata } from "../analyzer/metadataBuilder.js";
 import { detectFrameworks } from "../analyzer/frameworkDetector.js";
 import { calculateHealthScore } from "../analyzer/healthScore.js";
+import { detectArchitecture } from "../analyzer/architectureDetector.js";
 
 export const analyzeProject = async (projectPath) => {
 
@@ -21,10 +22,13 @@ export const analyzeProject = async (projectPath) => {
         frameworks
     );
 
+    // Step 5: Determine architecture (placeholder for now)
+    const architecture = detectArchitecture(scanResult);
     return {
         scan: scanResult,
         metadata,
         frameworks,
+        architecture,
         health
     };
 
