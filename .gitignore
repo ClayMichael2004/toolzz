@@ -1,0 +1,99 @@
+# ==========================
+# Dependencies
+# ==========================
+node_modules/
+
+# ==========================
+# Environment Variables
+# ==========================
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# ==========================
+# Logs
+# ==========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ==========================
+# Build Output
+# ==========================
+dist/
+build/
+
+# ==========================
+# Coverage
+# ==========================
+coverage/
+
+# ==========================
+# Runtime Files
+# ==========================
+*.pid
+*.seed
+*.pid.lock
+
+# ==========================
+# OS Files
+# ==========================
+.DS_Store
+Thumbs.db
+
+# ==========================
+# IDEs
+# ==========================
+.vscode/
+.idea/
+
+# Keep shared VS Code settings if needed
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ==========================
+# React / Vite
+# ==========================
+frontend/node_modules/
+frontend/dist/
+
+# ==========================
+# Database
+# ==========================
+*.sqlite
+*.db
+
+# ==========================
+# Testing
+# ==========================
+.nyc_output/
+
+# ==========================
+# Temporary Files
+# ==========================
+tmp/
+temp/
+.cache/
+
+# ==========================
+# Archives
+# ==========================
+*.zip
+*.tar
+*.gz
+
+# ==========================
+# Docker
+# ==========================
+.docker/
+
+# ==========================
+# Misc
+# ==========================
+*.swp
+*.swo

@@ -1,11 +1,10 @@
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 dotenv.config();
+console.log(process.env.GEMINI_API_KEY)
 import express from "express"
 import cors from "cors"
 import aiRoutes from "./routes/ai.routes.js"
 import errorHandler from "./middleware/error.middleware.js";
-
-dotenv.config();
 
 const app = express();
 
