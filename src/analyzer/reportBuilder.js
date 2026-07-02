@@ -2,6 +2,7 @@ export const buildReport = ({
     scan,
     metadata,
     frameworks,
+    dependencies,
     architecture,
     health
 }) => {
@@ -22,6 +23,8 @@ export const buildReport = ({
             buildTool: frameworks.buildTool,
             testing: frameworks.testing
         },
+
+        dependenyAnalysis: dependencies,
 
         architecture,
 
