@@ -5,6 +5,7 @@ import { calculateHealthScore } from "../analyzer/healthScore.js";
 import { detectArchitecture } from "../analyzer/architectureDetector.js";
 import { buildReport } from "../analyzer/reportBuilder.js";
 import  {detectDependencies}from "../analyzer/dependencyDetector.js"
+import { detectDocumentation } from "../analyzer/documentationDetector.js";
 
 export const analyzeProject = async (projectPath) => {
 
@@ -19,6 +20,9 @@ export const analyzeProject = async (projectPath) => {
 
     // Step 4: dependencies metadata
     const dependencies=detectDependencies(metadata.dependencies);
+
+    //Step 5: documentation scanner
+    const documentation=detectDocumentation(scanResult);
 
     // Step 4: Calculate health score
     const health = calculateHealthScore(
@@ -36,6 +40,7 @@ export const analyzeProject = async (projectPath) => {
         metadata,
         frameworks,
         dependencies,
+        documentation,
         architecture,
         health,
     });

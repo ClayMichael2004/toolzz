@@ -3,6 +3,7 @@ export const buildReport = ({
     metadata,
     frameworks,
     dependencies,
+    documentation,
     architecture,
     health
 }) => {
@@ -25,6 +26,8 @@ export const buildReport = ({
         },
 
         dependenyAnalysis: dependencies,
+
+        documentation,
 
         architecture,
 
