@@ -1,125 +1,109 @@
 export const calculateHealthScore = (
     scanResult,
     metadata,
-    frameworks
+    frameworks,
+    documentation,
+    security
 ) => {
 
     const report = {
         overallScore: 0,
-
         documentation: 0,
         security: 0,
         testing: 0,
         maintainability: 0,
-
         recommendations: []
     };
 
-    //-------------------------------------------------
     // Documentation
-    //-------------------------------------------------
+    let documentationScore = 0;
 
-    const hasReadme = scanResult.importantFiles.some(
-        file => file.name === "README.md"
-    );
+    if (documentation.readme) documentationScore += 40;
+    if (documentation.license) documentationScore += 20;
+    if (documentation.envExample) documentationScore += 20;
+    if (documentation.changelog) documentationScore += 10;
+    if (documentation.contributing) documentationScore += 10;
 
-    report.documentation = hasReadme ? 100 : 30;
+    report.documentation = documentationScore;
 
-    if (!hasReadme) {
+    if (!documentation.readme) {
         report.recommendations.push(
             "Create a professional README.md."
         );
     }
 
-    //-------------------------------------------------
+    if (!documentation.license) {
+        report.recommendations.push(
+            "Add a LICENSE file."
+        );
+    }
+
+    if (!documentation.envExample) {
+        report.recommendations.push(
+            "Provide a .env.example file."
+        );
+    }
     // Testing
-    //-------------------------------------------------
 
     if (frameworks.testing !== "Unknown") {
         report.testing = 100;
     } else {
         report.testing = 20;
-
         report.recommendations.push(
             "Add automated tests (Vitest or Jest)."
         );
     }
-
-    //-------------------------------------------------
     // Security
-    //-------------------------------------------------
+    let securityScore = 50;
 
-    report.security = 70;
-
-    if (
-        metadata.dependencies.includes("helmet")
-    ) {
-        report.security += 15;
-    } else {
-
+    if (security.helmet) securityScore += 10;
+    else {
         report.recommendations.push(
             "Use Helmet to secure Express applications."
         );
-
     }
 
-    if (
-        metadata.dependencies.includes("cors")
-    ) {
+    if (security.cors) securityScore += 10;
 
-        report.security += 15;
-
-    }
-
-    if (
-        !metadata.dependencies.includes("jsonwebtoken") &&
-        frameworks.authentication === "Unknown"
-    ) {
-
+    if (security.jwt) securityScore += 10;
+    else {
         report.recommendations.push(
             "Consider implementing authentication."
         );
-
     }
 
-    //-------------------------------------------------
-    // Maintainability
-    //-------------------------------------------------
+    if (security.bcrypt) securityScore += 10;
 
-    report.maintainability = 100;
+    if (security.dotenv) securityScore += 10;
+
+    report.security = securityScore;
+
+    // Maintainability
+    let maintainability = 100;
 
     if (scanResult.totalFiles > 500) {
-
-        report.maintainability -= 10;
-
+        maintainability -= 10;
     }
 
     if (scanResult.totalFolders < 3) {
-
-        report.maintainability -= 20;
+        maintainability -= 20;
 
         report.recommendations.push(
             "Organize the project into logical folders."
         );
-
     }
 
-    //-------------------------------------------------
-    // Overall Score
-    //-------------------------------------------------
+    report.maintainability = maintainability;
 
+    // Overall
     report.overallScore = Math.round(
-
         (
             report.documentation +
             report.security +
             report.testing +
             report.maintainability
-
         ) / 4
-
     );
-
     return report;
 
 };

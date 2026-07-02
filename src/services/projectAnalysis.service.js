@@ -6,6 +6,7 @@ import { detectArchitecture } from "../analyzer/architectureDetector.js";
 import { buildReport } from "../analyzer/reportBuilder.js";
 import  {detectDependencies}from "../analyzer/dependencyDetector.js"
 import { detectDocumentation } from "../analyzer/documentationDetector.js";
+import { detectSecurity } from "../analyzer/securityDetector.js";
 
 export const analyzeProject = async (projectPath) => {
 
@@ -24,11 +25,17 @@ export const analyzeProject = async (projectPath) => {
     //Step 5: documentation scanner
     const documentation=detectDocumentation(scanResult);
 
+    //Step 6: security detecytor
+    const security=detectSecurity(metadata.dependencies, scanResult.importantFiles);
+
     // Step 4: Calculate health score
     const health = calculateHealthScore(
         scanResult,
         metadata,
-        frameworks
+        frameworks,
+        dependencies,
+        documentation,
+        security
     );
 
     // Step 5: Determine architecture (placeholder for now)
@@ -41,6 +48,7 @@ export const analyzeProject = async (projectPath) => {
         frameworks,
         dependencies,
         documentation,
+        security,
         architecture,
         health,
     });
