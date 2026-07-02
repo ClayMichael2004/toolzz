@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { extractProject } from "../analyzer/zipExtractor.js";
+import { extractUploadedProject } from "../middleware/extractProject.middleware.js";
 import { generateReadmeController } from "../controllers/readme.controller.js";
 
 const router = express.Router();
@@ -12,7 +12,7 @@ const upload = multer({
 router.post(
     "/generate",
     upload.single("project"),
-    extractProject,
+    extractUploadedProject,
     generateReadmeController
 );
 

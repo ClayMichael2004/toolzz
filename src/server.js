@@ -11,12 +11,12 @@ const app = express();
 app.use(cors());
 app.use(express.json())
 app.use("/api/ai", aiRoutes)
-app.use(errorHandler)
 app.use("/api/project", projectRoutes)
 app.use("/api/readme", readmeRoutes)
 app.get("/", (req, res)=>{
     res.json({message: "Toolzz AI API is running"});
 });
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 5000;
 

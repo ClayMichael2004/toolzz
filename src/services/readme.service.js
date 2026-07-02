@@ -1,9 +1,5 @@
-import { GoogleGenAI } from "@google/genai";
+import axios from "axios";
 import { buildReadmePrompt } from "./readmePromptBuilder.js";
-
-const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY,
-});
 
 export const generateReadme = async (report) => {
 
@@ -11,16 +7,29 @@ export const generateReadme = async (report) => {
 
         const prompt = buildReadmePrompt(report);
 
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-        });
+        const response = await axios.post(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+            {
+                contents: [
+                    {
+                        parts: [
+                            {
+                                text: prompt
+                            }
+                        ]
+                    }
+                ]
+            }
+        );
 
-        return response.text;
+        return response.data.candidates[0].content.parts[0].text;
 
     } catch (error) {
 
-        console.error("README Generation Error:", error);
+        console.error(
+            "README Generation Error:",
+            error.response?.data || error.message
+        );
 
         throw new Error("Failed to generate README.");
 
