@@ -1,12 +1,12 @@
 import Sidebar from "../components/Sidebar.jsx";
 
-const DashboardLayout = ({ children })=>{
-    return (
-        <div style={{display: "flex", minHeight: "100vh"}}>
-            <Sidebar/>
-            <main style={{flex: 1, padding: "20px"}}>{children}</main>
-        </div>
-    );
+const DashboardLayout = ({ children }) => {
+  return (
+    <div className="dashboard-shell">
+      <Sidebar />
+      <main className="dashboard-main">{children}</main>
+    </div>
+  );
 };
 
 export default DashboardLayout;

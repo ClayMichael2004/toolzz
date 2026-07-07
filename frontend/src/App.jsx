@@ -3,18 +3,20 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import CommitPage from "./pages/CommitPage";
 import ReadmePage from "./pages/ReadmePage";
 import ErrorPage from "./pages/ErrorPage";
+import AnalyzerPage from "./pages/AnalyzerPage";
 
 function App(){
   return (
     <BrowserRouter>
-    <DashboardLayout>
-      <Routes>
-        <Route path="/" element={<CommitPage/>}/>
-        <Route path="/error" element={<ErrorPage/>}/>
-        <Route path="/readme" element={<ReadmePage/>}/>
-      </Routes>
+      <DashboardLayout>
+        <Routes>
+          <Route path="/" element={<CommitPage />} />
+          <Route path="/error" element={<ErrorPage />} />
+          <Route path="/readme" element={<ReadmePage />} />
+          <Route path="/analyzer" element={<AnalyzerPage />} />
+        </Routes>
       </DashboardLayout>
-      </BrowserRouter>
+    </BrowserRouter>
   );
 }
 

@@ -1,43 +1,47 @@
 import { useState } from "react";
 
-const ToolInput = ({ title, placeholder, onGenerate, loading }) => {
+const ToolInput = ({ title, placeholder, onGenerate, loading, message }) => {
   const [input, setInput] = useState("");
+  const [validationError, setValidationError] = useState("");
 
   const handleSubmit = () => {
-    if (!input.trim()) return;
+    if (!input.trim()) {
+      setValidationError("Enter a description or error text to generate a response.");
+      return;
+    }
 
+    setValidationError("");
     onGenerate(input);
   };
 
   return (
-    <div>
-      <h2>{title}</h2>
+    <div className="tool-card">
+      <div className="tool-card-header">
+        <h2>{title}</h2>
+      </div>
 
       <textarea
         rows="10"
         value={input}
         placeholder={placeholder}
-        onChange={(e) => setInput(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "12px",
-          fontSize: "16px",
-          marginTop: "10px",
-          resize: "vertical",
+        onChange={(e) => {
+          setInput(e.target.value);
+          setValidationError("");
         }}
+        className="tool-textarea"
       />
 
-      <button
-        onClick={handleSubmit}
-        disabled={loading}
-        style={{
-          marginTop: "15px",
-          padding: "10px 20px",
-          cursor: "pointer",
-        }}
-      >
-        {loading ? "Generating..." : "Generate"}
-      </button>
+      <div className="tool-actions">
+        <button className="button" onClick={handleSubmit} disabled={loading}>
+          {loading ? "Generating..." : "Generate"}
+        </button>
+
+        {(message || validationError) && (
+          <div className={`notification ${validationError ? "error" : message?.type || "info"}`}>
+            {validationError || message?.text}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
