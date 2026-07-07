@@ -555,6 +555,48 @@
   padding: 22px;
 }
 
+.analyzer-page .summary-card,
+.analyzer-page .status-card,
+.analyzer-page .recommendations-card {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+}
+
+.analyzer-page .summary-card .eyebrow,
+.analyzer-page .status-card .card-header h3,
+.analyzer-page .recommendations-card h3 {
+  color: #c4b5fd;
+}
+
+.analyzer-page .tech-item,
+.analyzer-page .metric-row,
+.analyzer-page .stat-item,
+.analyzer-page .card-header {
+  color: #e2e8f0;
+}
+
+.analyzer-page .tech-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.analyzer-page .badge {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.stack-hint {
+  margin-top: 16px;
+  font-size: 0.98rem;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .score-card h2 {
   margin: 10px 0 8px;
   font-size: 4rem;

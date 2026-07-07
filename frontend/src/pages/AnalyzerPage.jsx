@@ -2,6 +2,9 @@ import { useState } from "react";
 import api from "../services/api";
 
 const scoreToPercentage = (value) => Math.min(100, Math.max(0, value || 0));
+const displayTechValue = (value) => value && value !== "Unknown" ? value : "Not detected";
+const hasTechSignals = (techStack) =>
+  Object.values(techStack || {}).some((value) => value && value !== "Unknown");
 
 const AnalyzerPage = () => {
   const [file, setFile] = useState(null);
@@ -154,10 +157,15 @@ const AnalyzerPage = () => {
                 {Object.entries(analysis.techStack || {}).map(([key, value]) => (
                   <div className="tech-item" key={key}>
                     <p>{key.replace(/([A-Z])/g, " $1").replace(/\b\w/g, (c) => c.toUpperCase())}</p>
-                    <strong>{value || "N/A"}</strong>
+                    <strong>{displayTechValue(value)}</strong>
                   </div>
                 ))}
               </div>
+              {!hasTechSignals(analysis.techStack) && (
+                <div className="stack-hint">
+                  No strong tech stack signals were detected. This may be a frontend-only repo or use a non-standard dependency layout.
+                </div>
+              )}
             </div>
 
             <div className="status-card">

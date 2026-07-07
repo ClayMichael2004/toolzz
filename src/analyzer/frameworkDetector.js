@@ -1,5 +1,10 @@
 export const detectFrameworks = (dependencies = []) => {
 
+    const hasPackage = (name) =>
+        dependencies.some((dependency) =>
+            dependency === name || dependency.startsWith(`${name}/`) || dependency.includes(name)
+        );
+
     const result = {
         frontend: "Unknown",
         backend: "Unknown",
@@ -10,64 +15,103 @@ export const detectFrameworks = (dependencies = []) => {
     };
 
     // ---------- Frontend ----------
-    if (dependencies.includes("react"))
-        result.frontend = "React";
-
-    if (dependencies.includes("next"))
+    if (hasPackage("next"))
         result.frontend = "Next.js";
 
-    if (dependencies.includes("vue"))
+    if (hasPackage("remix"))
+        result.frontend = "Remix";
+
+    if (hasPackage("svelte"))
+        result.frontend = "Svelte";
+
+    if (hasPackage("solid-js") || hasPackage("solid-start"))
+        result.frontend = "Solid";
+
+    if (hasPackage("preact"))
+        result.frontend = "Preact";
+
+    if (hasPackage("react"))
+        result.frontend = "React";
+
+    if (hasPackage("vue"))
         result.frontend = "Vue";
 
-    if (dependencies.includes("@angular/core"))
+    if (hasPackage("@angular/core") || hasPackage("angular"))
         result.frontend = "Angular";
 
     // ---------- Backend ----------
-    if (dependencies.includes("express"))
-        result.backend = "Express";
-
-    if (dependencies.includes("@nestjs/core"))
+    if (hasPackage("@nestjs/core") || hasPackage("nestjs"))
         result.backend = "NestJS";
 
-    if (dependencies.includes("fastify"))
+    if (hasPackage("express"))
+        result.backend = "Express";
+
+    if (hasPackage("fastify"))
         result.backend = "Fastify";
 
-    if (dependencies.includes("koa"))
+    if (hasPackage("koa"))
         result.backend = "Koa";
 
+    if (hasPackage("@hapi/hapi") || hasPackage("hapi"))
+        result.backend = "Hapi";
+
+    if (hasPackage("serverless-http"))
+        result.backend = "Serverless";
+
     // ---------- Database ----------
-    if (dependencies.includes("pg"))
+    if (hasPackage("pg") || hasPackage("postgres"))
         result.database = "PostgreSQL";
 
-    if (dependencies.includes("mongoose"))
+    if (hasPackage("mongoose") || hasPackage("mongodb"))
         result.database = "MongoDB";
 
-    if (dependencies.includes("mysql2"))
+    if (hasPackage("mysql2") || hasPackage("mysql"))
         result.database = "MySQL";
 
-    if (dependencies.includes("sqlite3"))
+    if (hasPackage("sqlite3") || hasPackage("better-sqlite3") || hasPackage("sqlite"))
         result.database = "SQLite";
 
+    if (hasPackage("@prisma/client"))
+        result.database = "Prisma";
+
     // ---------- Authentication ----------
-    if (dependencies.includes("jsonwebtoken"))
+    if (hasPackage("jsonwebtoken"))
         result.authentication = "JWT";
 
-    if (dependencies.includes("passport"))
+    if (hasPackage("passport") || hasPackage("passport-local") || hasPackage("passport-jwt"))
         result.authentication = "Passport";
 
+    if (hasPackage("bcrypt") || hasPackage("bcryptjs"))
+        result.authentication = "Bcrypt";
+
     // ---------- Build Tools ----------
-    if (dependencies.includes("vite"))
+    if (hasPackage("vite"))
         result.buildTool = "Vite";
 
-    if (dependencies.includes("webpack"))
+    if (hasPackage("webpack"))
         result.buildTool = "Webpack";
 
+    if (hasPackage("rollup"))
+        result.buildTool = "Rollup";
+
+    if (hasPackage("parcel"))
+        result.buildTool = "Parcel";
+
     // ---------- Testing ----------
-    if (dependencies.includes("jest"))
+    if (hasPackage("vitest"))
+        result.testing = "Vitest";
+
+    if (hasPackage("jest"))
         result.testing = "Jest";
 
-    if (dependencies.includes("vitest"))
-        result.testing = "Vitest";
+    if (hasPackage("mocha"))
+        result.testing = "Mocha";
+
+    if (hasPackage("cypress"))
+        result.testing = "Cypress";
+
+    if (hasPackage("playwright"))
+        result.testing = "Playwright";
 
     return result;
 };
