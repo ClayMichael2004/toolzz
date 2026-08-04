@@ -1,16 +1,28 @@
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
+import ToolOutput from "../components/ToolOutput";
 import api from "../services/api";
+import { FileText, UploadCloud, FileArchive, CheckCircle2, AlertCircle } from "lucide-react";
 
 function ReadmePage() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [readme, setReadme] = useState("");
   const [notification, setNotification] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleFileChange = (selectedFile) => {
+    if (!selectedFile) return;
+    if (!selectedFile.name.endsWith(".zip")) {
+      setNotification({ type: "error", text: "Only .zip archive files are supported." });
+      return;
+    }
+    setFile(selectedFile);
+    setNotification(null);
+  };
 
   const handleGenerate = async () => {
     if (!file) {
-      setNotification({ type: "error", text: "Please choose a ZIP file to generate a README." });
+      setNotification({ type: "error", text: "Please upload a project ZIP file first." });
       return;
     }
 
@@ -19,7 +31,7 @@ function ReadmePage() {
 
     try {
       setLoading(true);
-      setNotification({ type: "info", text: "Generating your README — this may take a few moments." });
+      setNotification({ type: "info", text: "Analyzing codebase & generating README documentation..." });
 
       const response = await api.post("/readme/generate", formData, {
         headers: {
@@ -27,37 +39,18 @@ function ReadmePage() {
         },
       });
 
-      setReadme(response.data.readme || "");
-      setNotification({ type: "success", text: "README generated successfully." });
+      if (response.data?.readme) {
+        setReadme(response.data.readme);
+        setNotification({ type: "success", text: "README.md generated successfully." });
+      } else {
+        setNotification({ type: "error", text: "Failed to parse repository for README generation." });
+      }
     } catch (error) {
       console.error(error);
-      setNotification({ type: "error", text: "Failed to generate README. Please try again." });
+      setNotification({ type: "error", text: "Unable to generate README. Check that your ZIP archive is valid." });
     } finally {
       setLoading(false);
     }
-  };
-
-  const copyReadme = async () => {
-    try {
-      await navigator.clipboard.writeText(readme);
-      setNotification({ type: "success", text: "README copied to clipboard." });
-    } catch (error) {
-      console.error(error);
-      setNotification({ type: "error", text: "Unable to copy README. Please try again." });
-    }
-  };
-
-  const downloadReadme = () => {
-    const blob = new Blob([readme], {
-      type: "text/markdown",
-    });
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "README.md";
-    link.click();
-    URL.revokeObjectURL(url);
   };
 
   return (
@@ -68,59 +61,90 @@ function ReadmePage() {
             <div className="spinner" />
             <div>
               <p className="loading-title">Generating README</p>
-              <p className="loading-copy">Analyzing your repository structure and creating a polished README.</p>
+              <p className="loading-copy">Inspecting files, dependencies, and structure to build documentation...</p>
             </div>
           </div>
         </div>
       )}
+
       <div className="page-header">
-        <p className="eyebrow">README Generator</p>
-        <h1>Build a polished README instantly</h1>
+        <div className="eyebrow">
+          <FileText size={14} />
+          <span>Documentation Engine</span>
+        </div>
+        <h1>README Generator</h1>
         <p className="page-copy">
-          Upload your project ZIP and let the AI craft a readable README that looks great and reflects the repo contents.
+          Upload a project ZIP file to automatically analyze code structure, detect stack technologies, and build a professional README.md.
         </p>
       </div>
 
       <div className="tool-card">
         <div className="tool-card-header">
-          <h2>Upload project ZIP</h2>
+          <h2>Upload Project Workspace</h2>
         </div>
 
-        <div className="tool-actions upload-row">
-          <label className="file-upload">
-            <span>{file ? file.name : "Choose a .zip archive"}</span>
-            <input type="file" accept=".zip" onChange={(e) => {
-              setFile(e.target.files[0]);
-              setNotification(null);
-            }} />
-          </label>
+        <label
+          className={`file-dropzone ${isDragging ? "active" : ""}`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setIsDragging(false);
+            if (e.dataTransfer.files?.[0]) {
+              handleFileChange(e.dataTransfer.files[0]);
+            }
+          }}
+        >
+          <input
+            type="file"
+            accept=".zip"
+            style={{ display: "none" }}
+            onChange={(e) => handleFileChange(e.target.files[0])}
+          />
 
-          <button className="button" onClick={handleGenerate} disabled={loading}>
-            {loading ? "Generating README..." : "Generate README"}
-          </button>
-        </div>
-
-        {notification && (
-          <div className={`notification ${notification.type}`}>
-            {notification.text}
+          <div className="dropzone-icon">
+            <UploadCloud size={24} />
           </div>
-        )}
+
+          <div>
+            <p className="dropzone-text">
+              {file ? file.name : "Click to select or drag & drop a ZIP file"}
+            </p>
+            <p className="dropzone-subtext">Supports .zip archives containing project source code (Max: 100MB)</p>
+          </div>
+
+          {file && (
+            <div className="file-selected-badge">
+              <FileArchive size={16} />
+              <span>{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
+              <CheckCircle2 size={16} style={{ color: "#34d399" }} />
+            </div>
+          )}
+        </label>
+
+        <div className="tool-actions">
+          <button className="button" onClick={handleGenerate} disabled={loading || !file}>
+            {loading ? "Generating..." : "Generate README"}
+          </button>
+
+          {notification && (
+            <div className={`notification ${notification.type}`}>
+              <AlertCircle size={16} />
+              <span>{notification.text}</span>
+            </div>
+          )}
+        </div>
       </div>
 
-      {readme && (
-        <div className="tool-card readme-card">
-          <div className="tool-card-header">
-            <h2>Preview</h2>
-            <div className="tool-actions">
-              <button className="button secondary" onClick={copyReadme}>Copy README</button>
-              <button className="button secondary" onClick={downloadReadme}>Download README</button>
-            </div>
-          </div>
-          <div className="readme-preview">
-            <ReactMarkdown>{readme}</ReactMarkdown>
-          </div>
-        </div>
-      )}
+      <ToolOutput
+        output={readme}
+        title="Generated README.md"
+        filename="README.md"
+        allowDownload={true}
+      />
     </div>
   );
 }
