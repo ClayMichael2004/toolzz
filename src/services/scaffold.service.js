@@ -3,67 +3,93 @@ export const parseTreeToPaths = (inputText) => {
   const dirs = new Set();
   const files = new Set();
 
-  const pathStack = [];
+  let rootFolder = "";
+  const cleanedItems = [];
 
+  // Step 1: Detect root container folder and clean comments
   for (let rawLine of lines) {
+    if (!rawLine.trim()) continue;
+
+    // Strip comments (# ..., // ..., /* ...)
     let line = rawLine;
-
-    // Skip empty lines
-    if (!line.trim()) continue;
-
-    // Determine leading indentation depth before tree symbols
-    const indentMatch = line.match(/^[\s│|]*/);
-    const leadingSpaces = indentMatch ? indentMatch[0].replace(/│/g, " ").replace(/\|/g, " ").length : 0;
-    const depth = Math.floor(leadingSpaces / 2);
-
-    // Clean tree branch symbols (├─, └─, ├──, └──, +--, etc.)
-    line = line
-      .replace(/^[\s│|]+/, "")
-      .replace(/^[├└+\]\\|\-─\s]+/, "")
-      .trim();
-
-    if (!line) continue;
-
-    // Strip inline comments (# ..., // ..., /* ...)
     const commentIndex = Math.min(
       line.indexOf("#") === -1 ? Infinity : line.indexOf("#"),
       line.indexOf("//") === -1 ? Infinity : line.indexOf("//"),
       line.indexOf("/*") === -1 ? Infinity : line.indexOf("/*")
     );
-
-    const hasExplicitDirSlash = (commentIndex !== Infinity ? line.slice(0, commentIndex) : line).trim().endsWith("/");
-
     if (commentIndex !== Infinity) {
-      line = line.slice(0, commentIndex).trim();
+      line = line.slice(0, commentIndex);
+    }
+    if (!line.trim()) continue;
+
+    const hasBranchSymbol = /[├└+\\|\-─]/.test(line);
+
+    // If first non-empty line has no branch symbols, it's the root container folder!
+    if (cleanedItems.length === 0 && !hasBranchSymbol) {
+      const candidateRoot = line.trim().replace(/[\/:\\]+$/, "");
+      if (candidateRoot && !candidateRoot.includes(".")) {
+        rootFolder = candidateRoot;
+        continue;
+      }
     }
 
-    if (!line) continue;
+    cleanedItems.push({ rawLine, line });
+  }
 
-    const cleanName = line.replace(/\/$/, "").trim();
+  const pathStack = rootFolder ? [rootFolder] : [];
+
+  for (let item of cleanedItems) {
+    const line = item.line;
+
+    // Determine tree depth level by counting pipe symbols ('│' or '|') or indent blocks before branch symbol
+    let indentPart = "";
+    const branchMatch = line.match(/^(.*?)[├└+]/);
+    if (branchMatch) {
+      indentPart = branchMatch[1];
+    } else {
+      indentPart = (line.match(/^[\s│|]*/) || [""])[0];
+    }
+
+    const treePipes = (indentPart.match(/[│|]/g) || []).length;
+    const plainSpaces = indentPart.replace(/[│|]/g, "").length;
+    const spaceLevels = Math.floor(plainSpaces / 4);
+
+    const relativeDepth = (branchMatch ? treePipes + spaceLevels : 0) + (rootFolder ? 1 : 0);
+
+    // Clean entry name
+    let cleanName = line
+      .replace(/^[│|\s├└+\]\\|\-─]+/, "")
+      .trim()
+      .replace(/[\/:\\]+$/, "");
+
     if (!cleanName) continue;
 
     // Determine if entry is directory or file
     const hasExtension = /\.[a-zA-Z0-9]+$/.test(cleanName) || cleanName.startsWith(".");
     const isKnownConfig = ["dockerfile", "makefile", "license", "procfile", "readme"].includes(cleanName.toLowerCase());
-    const isDir = hasExplicitDirSlash || (!hasExtension && !isKnownConfig);
+    const isExplicitDir = line.trim().endsWith("/");
+    const isDir = isExplicitDir || (!hasExtension && !isKnownConfig);
 
-    // Adjust path stack according to depth
-    while (pathStack.length > depth) {
+    // Adjust stack to relativeDepth
+    while (pathStack.length > relativeDepth) {
       pathStack.pop();
     }
-    pathStack[depth] = cleanName;
+    pathStack[relativeDepth] = cleanName;
 
-    const fullPath = pathStack.slice(0, depth + 1).join("/");
+    const fullPath = pathStack.slice(0, relativeDepth + 1).join("/");
 
     if (isDir) {
       dirs.add(fullPath);
     } else {
-      // Ensure parent directory is tracked
-      if (depth > 0) {
-        dirs.add(pathStack.slice(0, depth).join("/"));
+      if (relativeDepth > 0) {
+        dirs.add(pathStack.slice(0, relativeDepth).join("/"));
       }
       files.add(fullPath);
     }
+  }
+
+  if (rootFolder) {
+    dirs.add(rootFolder);
   }
 
   return {
