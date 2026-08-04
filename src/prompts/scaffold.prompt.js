@@ -2,10 +2,10 @@ export const scaffoldPrompt = (input) => {
   return `
 You are an expert DevOps engineer and CLI tooling expert.
 
-The user has provided a target project directory/file structure (which may be formatted as an ASCII tree, indented text, or list of file paths).
+The user has provided a target project directory/file structure (which may be formatted as an ASCII tree, indented text, or list of file paths, and MAY CONTAIN INLINE COMMENTS like "# Ensures uploads..." or "// comment").
 
 YOUR TASK:
-Analyze the input structure and generate ready-to-run scaffolding scripts in Bash, PowerShell, and Node.js.
+Strip away any inline comments (# comment, // comment) attached to file or directory lines. Parse ONLY the actual file and folder paths, and generate ready-to-run scaffolding scripts in Bash, PowerShell, and Node.js.
 
 ==================================================
 INPUT STRUCTURE
@@ -48,7 +48,7 @@ files.forEach(file => {
 console.log('Project structure created successfully!');
 \`\`\`
 
-Ensure all directory paths and file paths are correctly parsed from the input, correctly nested, and free of typos.
+CRITICAL: Strip out any inline comments (# comment, // comment) so they do NOT become part of file or directory names! Ensure all directory paths and file paths are clean, correctly nested, and free of typos.
 Do NOT output extra conversational chatter. Provide clean Markdown with the 3 code sections above.
 `;
 };

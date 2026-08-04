@@ -16,7 +16,7 @@ export const parseTreeToPaths = (inputText) => {
     const leadingSpaces = indentMatch ? indentMatch[0].replace(/│/g, " ").replace(/\|/g, " ").length : 0;
     const depth = Math.floor(leadingSpaces / 2);
 
-    // Clean tree branches (├─, └─, ├──, └──, +--, etc.)
+    // Clean tree branch symbols (├─, └─, ├──, └──, +--, etc.)
     line = line
       .replace(/^[\s│|]+/, "")
       .replace(/^[├└+\]\\|\-─\s]+/, "")
@@ -24,9 +24,28 @@ export const parseTreeToPaths = (inputText) => {
 
     if (!line) continue;
 
-    // Check if entry is directory or file
-    const isDir = line.endsWith("/") || (!line.includes(".") && !line.includes("-") && !line.includes("_"));
-    const cleanName = line.replace(/\/$/, "");
+    // Strip inline comments (# ..., // ..., /* ...)
+    const commentIndex = Math.min(
+      line.indexOf("#") === -1 ? Infinity : line.indexOf("#"),
+      line.indexOf("//") === -1 ? Infinity : line.indexOf("//"),
+      line.indexOf("/*") === -1 ? Infinity : line.indexOf("/*")
+    );
+
+    const hasExplicitDirSlash = (commentIndex !== Infinity ? line.slice(0, commentIndex) : line).trim().endsWith("/");
+
+    if (commentIndex !== Infinity) {
+      line = line.slice(0, commentIndex).trim();
+    }
+
+    if (!line) continue;
+
+    const cleanName = line.replace(/\/$/, "").trim();
+    if (!cleanName) continue;
+
+    // Determine if entry is directory or file
+    const hasExtension = /\.[a-zA-Z0-9]+$/.test(cleanName) || cleanName.startsWith(".");
+    const isKnownConfig = ["dockerfile", "makefile", "license", "procfile", "readme"].includes(cleanName.toLowerCase());
+    const isDir = hasExplicitDirSlash || (!hasExtension && !isKnownConfig);
 
     // Adjust path stack according to depth
     while (pathStack.length > depth) {
