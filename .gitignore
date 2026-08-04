@@ -74,10 +74,15 @@ frontend/dist/
 .nyc_output/
 
 # ==========================
-# Temporary Files
+# Temporary Files & Uploads
 # ==========================
 tmp/
 temp/
+src/temp/*
+!src/temp/.gitkeep
+uploads/
+src/uploads/*
+!src/uploads/.gitkeep
 .cache/
 
 # ==========================

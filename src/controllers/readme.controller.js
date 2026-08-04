@@ -1,3 +1,4 @@
+import fs from "fs/promises";
 import { generateReadme } from "../services/readme.service.js";
 import { analyzeProject } from "../services/projectAnalysis.service.js";
 
@@ -19,5 +20,12 @@ export const generateReadmeController = async (req, res, next) => {
         });
     } catch (error) {
         next(error);
+    } finally {
+        if (req.file?.path) {
+            await fs.rm(req.file.path, { force: true }).catch(() => {});
+        }
+        if (req.projectPath) {
+            await fs.rm(req.projectPath, { recursive: true, force: true }).catch(() => {});
+        }
     }
 };
