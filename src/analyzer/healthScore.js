@@ -1,109 +1,85 @@
 export const calculateHealthScore = (
-    scanResult,
-    metadata,
-    frameworks,
-    documentation,
-    security
+  scanResult,
+  metadata,
+  frameworks,
+  dependencies,
+  documentation,
+  security
 ) => {
+  const recommendations = [];
 
-    const report = {
-        overallScore: 0,
-        documentation: 0,
-        security: 0,
-        testing: 0,
-        maintainability: 0,
-        recommendations: []
-    };
+  // 1. Documentation Score
+  const docScore = documentation.score || 0;
+  if (!documentation.readme) {
+    recommendations.push("Create a comprehensive README.md file explaining project usage, setup, and endpoints.");
+  }
+  if (!documentation.envExample && metadata.envVars?.length > 0) {
+    recommendations.push("Provide a `.env.example` template for required environment variables.");
+  }
+  if (!documentation.license) {
+    recommendations.push("Add an open-source or proprietary LICENSE file.");
+  }
+  if (!documentation.dockerfile) {
+    recommendations.push("Consider adding a Dockerfile for containerized deployment parity.");
+  }
 
-    // Documentation
-    let documentationScore = 0;
+  // 2. Security Score
+  const secScore = security.score || 0;
+  if (!security.helmet && frameworks.backend === "Express.js") {
+    recommendations.push("Install `helmet` middleware to set HTTP security headers.");
+  }
+  if (!security.cors && (frameworks.backend !== "Not detected")) {
+    recommendations.push("Configure explicit CORS policy middleware to restrict unauthorized origins.");
+  }
+  if (!security.rateLimit && frameworks.backend !== "Not detected") {
+    recommendations.push("Implement API rate-limiting middleware (e.g. `express-rate-limit`) to prevent abuse.");
+  }
+  if (!security.validation) {
+    recommendations.push("Add robust input schema validation (e.g. Zod, Joi, Pydantic) for API request payloads.");
+  }
+  if (!security.gitignore) {
+    recommendations.push("Add a `.gitignore` file to prevent committing secrets and build artifacts.");
+  }
 
-    if (documentation.readme) documentationScore += 40;
-    if (documentation.license) documentationScore += 20;
-    if (documentation.envExample) documentationScore += 20;
-    if (documentation.changelog) documentationScore += 10;
-    if (documentation.contributing) documentationScore += 10;
+  // 3. Testing Score
+  let testingScore = 0;
+  const testFileCount = (scanResult.testFiles || []).length;
+  const hasTestFramework = frameworks.testing !== "Not detected";
 
-    report.documentation = documentationScore;
+  if (hasTestFramework && testFileCount > 0) {
+    testingScore = 100;
+  } else if (hasTestFramework) {
+    testingScore = 65;
+    recommendations.push(`Test framework (${frameworks.testing}) configured, but no test files were detected.`);
+  } else if (testFileCount > 0) {
+    testingScore = 60;
+  } else {
+    testingScore = 20;
+    recommendations.push("Set up unit and integration tests (e.g. Vitest, Jest, Pytest) to verify code reliability.");
+  }
 
-    if (!documentation.readme) {
-        report.recommendations.push(
-            "Create a professional README.md."
-        );
-    }
+  // 4. Maintainability Score
+  let maintainabilityScore = 50;
+  if (metadata.language === "TypeScript") maintainabilityScore += 20;
+  if (scanResult.manifestFiles.some(m => m.name.includes("eslint") || m.name.includes("prettier"))) maintainabilityScore += 15;
+  if (documentation.ciWorkflows) maintainabilityScore += 15;
 
-    if (!documentation.license) {
-        report.recommendations.push(
-            "Add a LICENSE file."
-        );
-    }
+  maintainabilityScore = Math.min(100, maintainabilityScore);
 
-    if (!documentation.envExample) {
-        report.recommendations.push(
-            "Provide a .env.example file."
-        );
-    }
-    // Testing
+  // Overall Weighted Score
+  const overallScore = Math.round(
+    docScore * 0.25 +
+    secScore * 0.30 +
+    testingScore * 0.25 +
+    maintainabilityScore * 0.20
+  );
 
-    if (frameworks.testing !== "Unknown") {
-        report.testing = 100;
-    } else {
-        report.testing = 20;
-        report.recommendations.push(
-            "Add automated tests (Vitest or Jest)."
-        );
-    }
-    // Security
-    let securityScore = 50;
-
-    if (security.helmet) securityScore += 10;
-    else {
-        report.recommendations.push(
-            "Use Helmet to secure Express applications."
-        );
-    }
-
-    if (security.cors) securityScore += 10;
-
-    if (security.jwt) securityScore += 10;
-    else {
-        report.recommendations.push(
-            "Consider implementing authentication."
-        );
-    }
-
-    if (security.bcrypt) securityScore += 10;
-
-    if (security.dotenv) securityScore += 10;
-
-    report.security = securityScore;
-
-    // Maintainability
-    let maintainability = 100;
-
-    if (scanResult.totalFiles > 500) {
-        maintainability -= 10;
-    }
-
-    if (scanResult.totalFolders < 3) {
-        maintainability -= 20;
-
-        report.recommendations.push(
-            "Organize the project into logical folders."
-        );
-    }
-
-    report.maintainability = maintainability;
-
-    // Overall
-    report.overallScore = Math.round(
-        (
-            report.documentation +
-            report.security +
-            report.testing +
-            report.maintainability
-        ) / 4
-    );
-    return report;
-
+  return {
+    overallScore,
+    documentation: docScore,
+    security: secScore,
+    testing: testingScore,
+    maintainability: maintainabilityScore,
+    recommendations
+  };
 };

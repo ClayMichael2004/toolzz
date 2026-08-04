@@ -1,31 +1,23 @@
 export const detectDocumentation = (scanResult) => {
+  const fileNames = (scanResult.importantFiles || []).map(file => file.name.toLowerCase());
+  const relPaths = (scanResult.fileTree || []).map(p => p.toLowerCase());
 
-    const fileNames = scanResult.importantFiles.map(file => file.name);
+  const has = (name) => fileNames.some(f => f === name.toLowerCase()) || relPaths.some(p => p.endsWith(name.toLowerCase()));
 
-    const has = (name) => fileNames.includes(name);
+  const report = {
+    readme: has("README.md") || has("README.txt") || has("README"),
+    license: has("LICENSE") || has("LICENSE.md") || has("LICENSE.txt"),
+    envExample: has(".env.example") || has(".env.template") || has(".env.sample"),
+    changelog: has("CHANGELOG.md") || has("CHANGELOG.txt"),
+    contributing: has("CONTRIBUTING.md"),
+    securityPolicy: has("SECURITY.md"),
+    dockerfile: has("Dockerfile"),
+    dockerCompose: has("docker-compose.yml") || has("docker-compose.yaml"),
+    ciWorkflows: relPaths.some(p => p.includes(".github/workflows"))
+  };
 
-    const report = {
+  const trueCount = Object.values(report).filter(val => val === true).length;
+  report.score = Math.min(100, Math.round((trueCount / Object.keys(report).length) * 100));
 
-        readme: has("README.md"),
-
-        license: has("LICENSE"),
-
-        envExample: has(".env.example"),
-
-        changelog: has("CHANGELOG.md"),
-
-        contributing: has("CONTRIBUTING.md"),
-
-        dockerfile: has("Dockerfile"),
-
-        dockerCompose: has("docker-compose.yml")
-
-    };
-
-    report.score = Object.values(report)
-        .filter(value => value === true)
-        .length;
-
-    return report;
-
+  return report;
 };

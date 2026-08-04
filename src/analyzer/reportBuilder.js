@@ -1,53 +1,65 @@
 export const buildReport = ({
-    scan,
-    metadata,
-    frameworks,
-    dependencies,
-    documentation,
-    security,
-    architecture,
-    health
+  scan,
+  metadata,
+  frameworks,
+  dependencies,
+  documentation,
+  security,
+  architecture,
+  health
 }) => {
+  return {
+    summary: {
+      projectName: scan.projectName,
+      language: metadata.language,
+      overallScore: health.overallScore,
+      packageManager: metadata.packageManager,
+      description: metadata.description
+    },
 
-    return {
+    techStack: {
+      frontend: frameworks.frontend,
+      backend: frameworks.backend,
+      database: frameworks.database,
+      authentication: frameworks.authentication,
+      buildTool: frameworks.buildTool,
+      testing: frameworks.testing
+    },
 
-        summary: {
-            projectName: scan.projectName,
-            language: metadata.language,
-            overallScore: health.overallScore
-        },
+    dependencies: metadata.dependencies || [],
 
-        techStack: {
-            frontend: frameworks.frontend,
-            backend: frameworks.backend,
-            database: frameworks.database,
-            authentication: frameworks.authentication,
-            buildTool: frameworks.buildTool,
-            testing: frameworks.testing
-        },
+    scripts: metadata.scripts || {},
 
-        dependenyAnalysis: dependencies,
+    environment: {
+      requiredVars: metadata.envVars || [],
+      hasTemplate: documentation.envExample
+    },
 
-        documentation,
+    entryPoints: metadata.entryFiles || [],
 
-        security,
+    architecture,
 
-        architecture,
+    documentation,
 
-        metrics: {
-            files: scan.totalFiles,
-            folders: scan.totalFolders,
-            extensions: scan.extensions
-        },
+    security,
 
-        quality: {
-            documentation: health.documentation,
-            security: health.security,
-            testing: health.testing,
-            maintainability: health.maintainability
-        },
+    metrics: {
+      files: scan.totalFiles,
+      folders: scan.totalFolders,
+      testFiles: scan.testFiles?.length || 0,
+      routeFiles: scan.routeFiles?.length || 0,
+      extensions: scan.extensions
+    },
 
-        recommendations: health.recommendations
-    };
+    fileTreeSummary: (scan.fileTree || []).slice(0, 100),
 
+    quality: {
+      documentation: health.documentation,
+      security: health.security,
+      testing: health.testing,
+      maintainability: health.maintainability
+    },
+
+    recommendations: health.recommendations
+  };
 };

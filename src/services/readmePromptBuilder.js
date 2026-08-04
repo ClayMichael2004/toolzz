@@ -1,61 +1,84 @@
 export const buildReadmePrompt = (report) => {
+  const scriptsFormatted = Object.entries(report.scripts || {})
+    .map(([name, cmd]) => `- \`${name}\`: \`${cmd}\``)
+    .join("\n") || "No custom scripts declared.";
 
-    return `
-You are a senior software engineer and technical writer.
+  const envVarsFormatted = (report.environment?.requiredVars || [])
+    .map(v => `- \`${v}\``)
+    .join("\n") || "No specific environment variables declared in .env.example.";
 
-Generate a professional README.md for the following software project.
+  const treeFormatted = (report.fileTreeSummary || [])
+    .slice(0, 60)
+    .join("\n") || "Standard repository layout.";
 
-Project Summary
----------------
-Project Name: ${report.summary.projectName}
-Language: ${report.summary.language}
-Health Score: ${report.summary.overallScore}/100
+  const depsFormatted = (report.dependencies || [])
+    .slice(0, 30)
+    .join(", ") || "None declared.";
 
-Tech Stack
-----------
-Frontend: ${report.techStack.frontend}
-Backend: ${report.techStack.backend}
-Database: ${report.techStack.database}
-Authentication: ${report.techStack.authentication}
-Build Tool: ${report.techStack.buildTool}
-Testing: ${report.techStack.testing}
+  return `
+You are a Principal Software Architect and Lead Technical Writer.
 
-Architecture
-------------
-${report.architecture.architecture}
+Your task is to write a 100% accurate, precise, professional, and comprehensive README.md for the software repository analyzed below.
+Base every command, setup instruction, script, environment variable, and feature description STRICTLY on the actual empirical project data provided. Do NOT hallucinate fake package names, fake CLI commands, or incorrect port numbers.
 
-Project Metrics
----------------
-Files: ${report.metrics.files}
-Folders: ${report.metrics.folders}
+==================================================
+EMPIRICAL REPOSITORY ANALYSIS REPORT
+==================================================
 
-Recommendations
----------------
-${report.recommendations.join("\n")}
+1. PROJECT IDENTIFICATION
+- Project Name: ${report.summary.projectName}
+- Primary Language: ${report.summary.language}
+- Package Manager: ${report.summary.packageManager}
+- Description: ${report.summary.description || "N/A"}
+- Overall Health Score: ${report.summary.overallScore}/100
 
-Write a README containing:
+2. DETECTED TECH STACK
+- Frontend: ${report.techStack.frontend}
+- Backend: ${report.techStack.backend}
+- Database / ORM: ${report.techStack.database}
+- Authentication: ${report.techStack.authentication}
+- Build / Bundler: ${report.techStack.buildTool}
+- Testing Framework: ${report.techStack.testing}
 
-# Project Title
+3. MANIFEST SCRIPTS & COMMANDS
+${scriptsFormatted}
 
-## Description
+4. REQUIRED ENVIRONMENT VARIABLES
+${envVarsFormatted}
 
-## Features
+5. KEY ENTRY POINTS & FILE METRICS
+- Total Files: ${report.metrics.files}
+- Total Folders: ${report.metrics.folders}
+- Detected Entry Points: ${(report.entryPoints || []).join(", ") || "Standard main module"}
 
-## Tech Stack
+6. CORE DEPENDENCIES
+${depsFormatted}
 
-## Installation
+7. ARCHITECTURE & FOLDER LAYOUT
+- Architecture Pattern: ${report.architecture?.architecture}
+- Reasons: ${(report.architecture?.reasons || []).join(" ")}
 
-## Usage
+Directory Structure (Subset):
+\`\`\`
+${treeFormatted}
+\`\`\`
 
-## Project Structure
+==================================================
+INSTRUCTIONS FOR THE README GENERATOR
+==================================================
+Generate a complete, beautiful, production-ready README.md formatted in valid Markdown:
 
-## API (if applicable)
+1. **Title & Badge Header**: Clear title, concise tagline, tech stack tags.
+2. **Project Description**: A sharp, technical overview of what the project does.
+3. **Key Features**: Highlight actual capabilities based on the tech stack and codebase architecture.
+4. **Tech Stack Summary**: Clean table or list of technologies used.
+5. **Environment Configuration**: List exact environment variables (${(report.environment?.requiredVars || []).join(", ") || "none"}) with instructions to copy \`.env.example\` to \`.env\`.
+6. **Installation & Getting Started**: Step-by-step setup using the exact package manager (${report.summary.packageManager}) and scripts provided above (e.g. installation, starting dev server).
+7. **Project Structure**: ASCII directory tree reflecting the actual repository structure.
+8. **Available Scripts**: Document the actual npm/package scripts discovered.
+9. **Testing & Quality Assurance**: Clear instructions for running tests based on the detected testing framework.
+10. **License**: Standard section.
 
-## Future Improvements
-
-## License
-
-Return ONLY valid Markdown.
+Return ONLY the pure Markdown content. Do NOT surround the response with markdown code blocks (e.g. \`\`\`markdown ... \`\`\`). Output pure markdown text directly.
 `;
-
 };
