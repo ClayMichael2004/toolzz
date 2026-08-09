@@ -15,15 +15,21 @@ const AgentSwitcher = () => {
 
   useEffect(() => {
     const loadProviders = async () => {
-      const data = await fetchAIProviders();
-      if (data && data.length > 0) {
-        setProviders(data);
+      try {
+        const data = await fetchAIProviders();
+        if (Array.isArray(data) && data.length > 0) {
+          setProviders(data);
+        }
+      } catch (e) {
+        console.warn("Could not load AI providers:", e);
       }
     };
     loadProviders();
 
     const handleAgentChange = () => {
-      setCurrentAgent(getSelectedAgent());
+      try {
+        setCurrentAgent(getSelectedAgent());
+      } catch (e) {}
     };
     window.addEventListener("toolzz_agent_changed", handleAgentChange);
     return () => window.removeEventListener("toolzz_agent_changed", handleAgentChange);
@@ -35,7 +41,8 @@ const AgentSwitcher = () => {
     setCurrentAgent(val);
   };
 
-  const activeProviderObj = providers.find((p) => p.id === currentAgent) || providers[0];
+  const safeProviders = Array.isArray(providers) ? providers : DEFAULT_PROVIDERS;
+  const activeProviderObj = safeProviders.find((p) => p.id === currentAgent) || safeProviders[0];
 
   return (
     <div className="agent-switcher-container">
@@ -52,7 +59,7 @@ const AgentSwitcher = () => {
         onChange={handleChange}
         className="agent-select-dropdown"
       >
-        {providers.map((p) => (
+        {safeProviders.map((p) => (
           <option key={p.id} value={p.id}>
             {p.name} {p.id !== "auto" && !p.configured ? "(No Key)" : ""}
           </option>

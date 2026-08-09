@@ -18,18 +18,28 @@ const api = axios.create({
 });
 
 export const getSelectedAgent = () => {
-    return localStorage.getItem("toolzz_selected_agent") || "auto";
+    try {
+        return localStorage.getItem("toolzz_selected_agent") || "auto";
+    } catch (e) {
+        return "auto";
+    }
 };
 
 export const setSelectedAgent = (agentId) => {
-    localStorage.setItem("toolzz_selected_agent", agentId);
-    window.dispatchEvent(new Event("toolzz_agent_changed"));
+    try {
+        localStorage.setItem("toolzz_selected_agent", agentId);
+    } catch (e) {
+        console.warn("localStorage not available:", e.message);
+    }
+    try {
+        window.dispatchEvent(new Event("toolzz_agent_changed"));
+    } catch (e) {}
 };
 
 export const fetchAIProviders = async () => {
     try {
         const response = await api.get("/ai/providers");
-        return response.data?.data || response.data || [];
+        return Array.isArray(response.data?.data) ? response.data.data : [];
     } catch (err) {
         console.warn("Failed to fetch AI providers from backend:", err.message);
         return [];
