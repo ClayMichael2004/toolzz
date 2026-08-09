@@ -63,14 +63,21 @@ export const generateAI = async (tool, input, providerOverride) => {
             throw new Error(response.data.message || "Backend request failed.");
         }
 
-        const dataObj = response.data?.data || response.data;
-        const result = dataObj?.result || response.data?.result;
+        const resData = response.data;
+        const candidateText = 
+            resData?.data?.result ||
+            resData?.result ||
+            resData?.readme ||
+            resData?.text ||
+            resData?.content ||
+            resData?.output ||
+            (typeof resData?.data === "string" ? resData.data : null);
 
-        if (typeof result === "string" && result.trim()) {
-            return result.trim();
+        if (typeof candidateText === "string" && candidateText.trim().length > 0) {
+            return candidateText.trim();
         }
 
-        throw new Error(response.data?.message || "No AI response returned from server.");
+        throw new Error(resData?.message || "AI server completed request but text payload was empty.");
     } catch (error) {
         const message = error.response?.data?.message || error.message || "Request failed.";
         throw new Error(message);
