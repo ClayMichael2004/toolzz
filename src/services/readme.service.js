@@ -1,30 +1,13 @@
-import axios from "axios";
 import { buildReadmePrompt } from "./readmePromptBuilder.js";
+import { generateAIResponse } from "./ai.service.js";
 
-export const generateReadme = async (report) => {
+export const generateReadme = async (report, provider) => {
   try {
     const prompt = buildReadmePrompt(report);
-    const modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt,
-              },
-            ],
-          },
-        ],
-      }
-    );
-
-    let rawText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    let rawText = await generateAIResponse(prompt, { provider });
 
     // Clean up surrounding ```markdown ... ``` wrapper if present
-    rawText = rawText.trim();
+    rawText = (rawText || "").trim();
     if (rawText.startsWith("```markdown")) {
       rawText = rawText.replace(/^```markdown\n?/, "").replace(/\n?```$/, "");
     } else if (rawText.startsWith("```md")) {
@@ -37,8 +20,8 @@ export const generateReadme = async (report) => {
   } catch (error) {
     console.error(
       "README Generation Error:",
-      error.response?.data || error.message
+      error.message
     );
-    throw new Error("Failed to generate README.");
+    throw new Error(`Failed to generate README: ${error.message}`);
   }
 };
