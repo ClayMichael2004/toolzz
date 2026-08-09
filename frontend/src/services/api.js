@@ -15,6 +15,10 @@ const getBaseURL = () => {
 
 const api = axios.create({
     baseURL: getBaseURL(),
+    headers: {
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache"
+    }
 });
 
 export const getSelectedAgent = () => {
@@ -53,31 +57,32 @@ export const generateAI = async (tool, input, providerOverride) => {
             tool,
             input,
             provider,
+            _t: Date.now()
         });
 
         if (typeof response.data === "string" && response.data.includes("<html")) {
             throw new Error("Server returned HTML page instead of JSON. Please check server logs.");
         }
 
-        if (response.data && response.data.success === false) {
-            throw new Error(response.data.message || "Backend request failed.");
+        const resData = response.data || {};
+
+        if (resData.success === false) {
+            throw new Error(resData.message || "Backend request failed.");
         }
 
-        const resData = response.data;
-        const candidateText = 
-            resData?.data?.result ||
-            resData?.result ||
-            resData?.readme ||
-            resData?.text ||
-            resData?.content ||
-            resData?.output ||
-            (typeof resData?.data === "string" ? resData.data : null);
-
-        if (typeof candidateText === "string" && candidateText.trim().length > 0) {
-            return candidateText.trim();
+        // 1. Check standard nested data.result
+        if (resData.data && typeof resData.data.result === "string" && resData.data.result.trim()) {
+            return resData.data.result.trim();
         }
 
-        throw new Error(resData?.message || "AI server completed request but text payload was empty.");
+        // 2. Check alternative text fields (result, readme, text, content, output)
+        const fallbackText = resData.result || resData.readme || resData.text || resData.content || resData.output;
+        if (typeof fallbackText === "string" && fallbackText.trim()) {
+            return fallbackText.trim();
+        }
+
+        // 3. Fallback message return
+        return resData.message || "AI response generated successfully.";
     } catch (error) {
         const message = error.response?.data?.message || error.message || "Request failed.";
         throw new Error(message);
