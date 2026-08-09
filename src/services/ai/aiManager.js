@@ -8,7 +8,8 @@ const PROVIDER_DRIVERS = {
   gemini: generateGeminiResponse,
 };
 
-const isKeySet = (key) => Boolean(key && typeof key === "string" && key.trim().length > 0);
+const sanitizeKey = (key) => (key || "").replace(/^["']|["']$/g, "").trim();
+const isKeySet = (key) => sanitizeKey(key).length > 0;
 
 export const getAvailableProviders = () => {
   return [
@@ -78,8 +79,13 @@ export const generateAIResponse = async (prompt, options = {}) => {
     try {
       console.log(`[AI Engine] Attempting generation with cloud provider: ${providerId}...`);
       const result = await driver(prompt, options.model);
-      console.log(`[AI Engine] Successfully generated response using: ${result.provider} (${result.model})`);
-      return result.text;
+      
+      if (result && result.text && typeof result.text === "string" && result.text.trim()) {
+        console.log(`[AI Engine] Successfully generated response using: ${result.provider} (${result.model})`);
+        return result.text.trim();
+      }
+      
+      throw new Error(`Provider '${providerId}' returned an empty text response.`);
     } catch (err) {
       lastError = err.message || err;
       console.warn(`[AI Engine] Provider '${providerId}' failed: ${lastError}`);

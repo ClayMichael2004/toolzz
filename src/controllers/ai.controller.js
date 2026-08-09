@@ -30,12 +30,19 @@ export const handleAIRequest = asyncHandler(
       }
     }
 
+    if (!result || typeof result !== "string" || !result.trim()) {
+      return res.status(500).json({
+        success: false,
+        message: "AI provider returned an empty response. Please try selecting a different AI agent in the sidebar."
+      });
+    }
+
     return successResponse(
       res,
       "Response generated successfully",
       {
         tool,
-        result,
+        result: result.trim(),
         provider: selectedProvider,
       }
     );

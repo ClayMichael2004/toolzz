@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const sanitizeKey = (key) => (key || "").replace(/^["']|["']$/g, "").trim();
+
 export const generateGeminiResponse = async (prompt, modelOverride) => {
-  const apiKey = (process.env.GEMINI_API_KEY || "").trim();
+  const apiKey = sanitizeKey(process.env.GEMINI_API_KEY);
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is missing or empty in Environment Variables.");
   }
@@ -30,10 +32,14 @@ export const generateGeminiResponse = async (prompt, modelOverride) => {
         { timeout: 15000 }
       );
 
-      const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (text) {
-        return { text, provider: "gemini", model };
+      const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text
+        || response.data?.candidates?.[0]?.text;
+
+      if (text && typeof text === "string" && text.trim()) {
+        return { text: text.trim(), provider: "gemini", model };
       }
+
+      console.warn(`[Gemini Provider] Model '${model}' returned empty text structure.`);
     } catch (error) {
       const errDetails = error.response?.data?.error?.message || error.response?.data || error.message;
       lastError = errDetails;
