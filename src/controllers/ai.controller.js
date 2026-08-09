@@ -1,6 +1,6 @@
 import { generateAIResponse, getAvailableProviders } from "../services/ai.service.js";
 import { buildPrompt } from "../prompts/index.js";
-import { generateFallbackScaffoldScript } from "../services/scaffold.service.js";
+import { generateSmartFallback } from "../services/localFallback.service.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { successResponse } from "../utils/apiResponse.js";
 
@@ -20,21 +20,14 @@ export const handleAIRequest = asyncHandler(
     let result;
 
     try {
-      result = await generateAIResponse(prompt, { provider: selectedProvider });
+      result = await generateAIResponse(prompt, { provider: selectedProvider, tool });
     } catch (error) {
-      console.warn("AI generation failed, checking for local fallback handler...", error.message);
-      if (tool === "scaffold" || tool === "structure") {
-        result = generateFallbackScaffoldScript(input);
-      } else {
-        throw error;
-      }
+      console.warn("Cloud AI generation failed, using local smart fallback...", error.message);
+      result = generateSmartFallback(tool, input);
     }
 
     if (!result || typeof result !== "string" || !result.trim()) {
-      return res.status(500).json({
-        success: false,
-        message: "AI provider returned an empty response. Please try selecting a different AI agent in the sidebar."
-      });
+      result = generateSmartFallback(tool, input);
     }
 
     return successResponse(

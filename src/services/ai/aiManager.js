@@ -1,6 +1,7 @@
 import { generateGroqResponse } from "./providers/groq.provider.js";
 import { generateOpenRouterResponse } from "./providers/openrouter.provider.js";
 import { generateGeminiResponse } from "./providers/gemini.provider.js";
+import { generateSmartFallback } from "../localFallback.service.js";
 
 const PROVIDER_DRIVERS = {
   groq: generateGroqResponse,
@@ -92,5 +93,6 @@ export const generateAIResponse = async (prompt, options = {}) => {
     }
   }
 
-  throw new Error(`All active AI agents failed to respond. Last error: ${lastError}`);
+  console.warn(`[AI Engine] All cloud AI providers failed or were quota limited. Activating Smart Fallback Generator. Last error: ${lastError}`);
+  return generateSmartFallback(options.tool, prompt);
 };
