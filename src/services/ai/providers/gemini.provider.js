@@ -1,9 +1,9 @@
 import axios from "axios";
 
 export const generateGeminiResponse = async (prompt, modelOverride) => {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = (process.env.GEMINI_API_KEY || "").trim();
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not configured.");
+    throw new Error("GEMINI_API_KEY is missing or empty in Environment Variables.");
   }
 
   const models = [
@@ -11,7 +11,7 @@ export const generateGeminiResponse = async (prompt, modelOverride) => {
     process.env.GEMINI_MODEL,
     "gemini-2.0-flash",
     "gemini-1.5-flash",
-    "gemini-2.5-flash"
+    "gemini-1.5-pro",
   ].filter(Boolean);
 
   let lastError = null;
@@ -35,10 +35,11 @@ export const generateGeminiResponse = async (prompt, modelOverride) => {
         return { text, provider: "gemini", model };
       }
     } catch (error) {
-      lastError = error.response?.data || error.message;
-      console.warn(`Gemini model ${model} failed:`, error.message);
+      const errDetails = error.response?.data?.error?.message || error.response?.data || error.message;
+      lastError = errDetails;
+      console.warn(`[Gemini Provider] Model '${model}' failed:`, errDetails);
     }
   }
 
-  throw new Error(`Gemini failed: ${JSON.stringify(lastError)}`);
+  throw new Error(`Gemini API Error: ${typeof lastError === "object" ? JSON.stringify(lastError) : lastError}`);
 };

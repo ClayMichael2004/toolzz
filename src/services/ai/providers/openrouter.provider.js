@@ -1,9 +1,9 @@
 import axios from "axios";
 
 export const generateOpenRouterResponse = async (prompt, modelOverride) => {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = (process.env.OPENROUTER_API_KEY || "").trim();
   if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY is not configured.");
+    throw new Error("OPENROUTER_API_KEY is missing or empty in Environment Variables.");
   }
 
   const freeModels = [
@@ -34,8 +34,8 @@ export const generateOpenRouterResponse = async (prompt, modelOverride) => {
         {
           headers: {
             Authorization: `Bearer ${apiKey}`,
-            "HTTP-Referer": "http://localhost:5000",
-            "X-Title": "Toolzz",
+            "HTTP-Referer": "https://toolzz.onrender.com",
+            "X-Title": "Toolzz AI",
             "Content-Type": "application/json",
           },
           timeout: 20000,
@@ -47,10 +47,11 @@ export const generateOpenRouterResponse = async (prompt, modelOverride) => {
         return { text, provider: "openrouter", model };
       }
     } catch (err) {
-      lastError = err.response?.data || err.message;
-      console.warn(`OpenRouter model ${model} failed:`, err.message);
+      const errDetails = err.response?.data?.error?.message || err.response?.data || err.message;
+      lastError = errDetails;
+      console.warn(`[OpenRouter Provider] Model '${model}' failed:`, errDetails);
     }
   }
 
-  throw new Error(`OpenRouter failed: ${JSON.stringify(lastError)}`);
+  throw new Error(`OpenRouter API Error: ${typeof lastError === "object" ? JSON.stringify(lastError) : lastError}`);
 };

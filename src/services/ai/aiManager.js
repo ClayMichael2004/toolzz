@@ -8,6 +8,8 @@ const PROVIDER_DRIVERS = {
   gemini: generateGeminiResponse,
 };
 
+const isKeySet = (key) => Boolean(key && typeof key === "string" && key.trim().length > 0);
+
 export const getAvailableProviders = () => {
   return [
     {
@@ -22,21 +24,21 @@ export const getAvailableProviders = () => {
       name: "Groq (Llama 3.3 70B)",
       description: "Blazing fast cloud inference (~500 tokens/sec). Free tier.",
       isFree: true,
-      configured: Boolean(process.env.GROQ_API_KEY),
+      configured: isKeySet(process.env.GROQ_API_KEY),
     },
     {
       id: "openrouter",
       name: "OpenRouter (Free Models)",
       description: "Free cloud models (Llama 3.2, Gemma 2, DeepSeek R1).",
       isFree: true,
-      configured: Boolean(process.env.OPENROUTER_API_KEY),
+      configured: isKeySet(process.env.OPENROUTER_API_KEY),
     },
     {
       id: "gemini",
       name: "Google Gemini",
       description: "Google Gemini Free Tier models.",
       isFree: true,
-      configured: Boolean(process.env.GEMINI_API_KEY),
+      configured: isKeySet(process.env.GEMINI_API_KEY),
     },
   ];
 };
@@ -60,20 +62,16 @@ export const generateAIResponse = async (prompt, options = {}) => {
 
   // Filter down to providers with configured keys
   const isConfigured = (p) => {
-    if (p === "groq") return Boolean(process.env.GROQ_API_KEY);
-    if (p === "openrouter") return Boolean(process.env.OPENROUTER_API_KEY);
-    if (p === "gemini") return Boolean(process.env.GEMINI_API_KEY);
+    if (p === "groq") return isKeySet(process.env.GROQ_API_KEY);
+    if (p === "openrouter") return isKeySet(process.env.OPENROUTER_API_KEY);
+    if (p === "gemini") return isKeySet(process.env.GEMINI_API_KEY);
     return false;
   };
 
   const configuredAttempts = attempts.filter(isConfigured);
+  const finalAttempts = configuredAttempts.length > 0 ? configuredAttempts : attempts;
 
-  if (configuredAttempts.length === 0) {
-    console.warn("[AI Engine] No API keys configured in environment variables!");
-    throw new Error("No free AI API keys (GROQ_API_KEY, OPENROUTER_API_KEY, or GEMINI_API_KEY) are set in your Render Environment Variables.");
-  }
-
-  for (const providerId of configuredAttempts) {
+  for (const providerId of finalAttempts) {
     const driver = PROVIDER_DRIVERS[providerId];
     if (!driver) continue;
 
