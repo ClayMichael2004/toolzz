@@ -28,6 +28,7 @@ function ReadmePage() {
 
     const formData = new FormData();
     formData.append("project", file);
+    formData.append("provider", localStorage.getItem("toolzz_selected_agent") || "auto");
 
     try {
       setLoading(true);

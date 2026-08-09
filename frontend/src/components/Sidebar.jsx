@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { GitCommit, AlertOctagon, FileText, BarChart3, FolderTree } from "lucide-react";
+import AgentSwitcher from "./AgentSwitcher.jsx";
 
 const Sidebar = () => {
   const navItems = [
@@ -42,14 +43,16 @@ const Sidebar = () => {
             })}
           </ul>
         </nav>
+
+        <AgentSwitcher />
       </div>
 
       <div className="sidebar-footer">
         <div className="status-badge">
           <span className="status-dot"></span>
-          <span>AI Engine</span>
+          <span>Multi-Agent Engine</span>
         </div>
-        <span className="version-tag">v1.1</span>
+        <span className="version-tag">v1.2</span>
       </div>
     </aside>
   );
