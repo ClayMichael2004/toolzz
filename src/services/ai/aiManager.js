@@ -67,9 +67,13 @@ export const generateAIResponse = async (prompt, options = {}) => {
   };
 
   const configuredAttempts = attempts.filter(isConfigured);
-  const finalAttempts = configuredAttempts.length > 0 ? configuredAttempts : attempts;
 
-  for (const providerId of finalAttempts) {
+  if (configuredAttempts.length === 0) {
+    console.warn("[AI Engine] No API keys configured in environment variables!");
+    throw new Error("No free AI API keys (GROQ_API_KEY, OPENROUTER_API_KEY, or GEMINI_API_KEY) are set in your Render Environment Variables.");
+  }
+
+  for (const providerId of configuredAttempts) {
     const driver = PROVIDER_DRIVERS[providerId];
     if (!driver) continue;
 
