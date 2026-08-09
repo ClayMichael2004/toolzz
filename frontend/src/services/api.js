@@ -70,12 +70,7 @@ export const generateAI = async (tool, input, providerOverride) => {
             return result.trim();
         }
 
-        if (response.data?.message && response.data.message !== "Response generated successfully") {
-            throw new Error(response.data.message);
-        }
-
-        // Ultimate Frontend Fallback Guarantee
-        return `Generated output for ${tool}:\n\n${input}`;
+        throw new Error(response.data?.message || "No AI response returned from server.");
     } catch (error) {
         const message = error.response?.data?.message || error.message || "Request failed.";
         throw new Error(message);

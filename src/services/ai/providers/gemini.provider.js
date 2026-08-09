@@ -11,9 +11,10 @@ export const generateGeminiResponse = async (prompt, modelOverride) => {
   const models = [
     modelOverride,
     process.env.GEMINI_MODEL,
-    "gemini-2.0-flash",
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
+    "gemini-2.5-flash",
+    "gemini-flash-latest",
+    "gemini-flash-lite-latest",
+    "gemini-3.6-flash",
   ].filter(Boolean);
 
   let lastError = null;
