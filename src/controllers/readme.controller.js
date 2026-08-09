@@ -10,13 +10,15 @@ export const generateReadmeController = async (req, res, next) => {
                 message: "No uploaded project found."
             });
         }
+        const provider = req.body?.provider || req.headers["x-ai-provider"] || "auto";
         const report = await analyzeProject(req.projectPath);
-        const readme = await generateReadme(report);
+        const readme = await generateReadme(report, provider);
 
         res.json({
             success: true,
             report,
-            readme
+            readme,
+            provider
         });
     } catch (error) {
         next(error);

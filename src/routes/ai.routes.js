@@ -1,8 +1,9 @@
 import express from "express";
-import { handleAIRequest } from "../controllers/ai.controller.js";
+import { handleAIRequest, getProvidersController } from "../controllers/ai.controller.js";
 
-const router=express.Router();
+const router = express.Router();
 
-router.post("/", handleAIRequest)
+router.get("/providers", getProvidersController);
+router.post("/", handleAIRequest);
 
 export default router;
