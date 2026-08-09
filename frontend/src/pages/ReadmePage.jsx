@@ -48,7 +48,8 @@ function ReadmePage() {
       }
     } catch (error) {
       console.error(error);
-      setNotification({ type: "error", text: "Unable to generate README. Check that your ZIP archive is valid." });
+      const errMsg = error.response?.data?.message || error.message || "Unable to generate README. Check that your ZIP archive is valid.";
+      setNotification({ type: "error", text: errMsg });
     } finally {
       setLoading(false);
     }

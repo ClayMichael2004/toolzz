@@ -26,9 +26,10 @@ const ErrorPage = () => {
       setMessage({ type: "success", text: "Error analysis ready." });
     } catch (error) {
       console.error(error);
+      const errMsg = error.response?.data?.message || error.message || "Unable to analyze error.";
       setMessage({
         type: "error",
-        text: "Unable to analyze error. Please ensure you provided a valid stack trace or error log.",
+        text: errMsg,
       });
     } finally {
       setLoading(false);

@@ -26,9 +26,10 @@ function CommitPage() {
       setMessage({ type: "success", text: "Commit message generated successfully." });
     } catch (error) {
       console.error(error);
+      const errMsg = error.response?.data?.message || error.message || "Unable to generate commit message.";
       setMessage({
         type: "error",
-        text: "Unable to generate commit message. Please describe your code changes in more detail.",
+        text: errMsg,
       });
     } finally {
       setLoading(false);

@@ -1,9 +1,11 @@
 {
   "name": "toolzz",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Toolzz AI Developer Suite",
+  "main": "src/server.js",
   "scripts": {
+    "start": "node src/server.js",
+    "build": "npm install && npm --prefix frontend install && npm --prefix frontend run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

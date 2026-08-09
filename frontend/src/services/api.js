@@ -1,7 +1,20 @@
 import axios from "axios";
 
+const getBaseURL = () => {
+    // 1. If explicit env variable is set during build or runtime
+    if (import.meta.env.VITE_API_URL) {
+        return import.meta.env.VITE_API_URL;
+    }
+    // 2. In production browser environment (not localhost), use relative path /api
+    if (typeof window !== "undefined" && !window.location.hostname.includes("localhost") && !window.location.hostname.includes("127.0.0.1")) {
+        return "/api";
+    }
+    // 3. Local development default
+    return "http://localhost:5000/api";
+};
+
 const api = axios.create({
-    baseURL: "http://localhost:5000/api",
+    baseURL: getBaseURL(),
 });
 
 export const getSelectedAgent = () => {

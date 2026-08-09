@@ -66,9 +66,10 @@ package.json`
       setMessage({ type: "success", text: "Scaffolding scripts generated for Linux, Windows & Node.js." });
     } catch (error) {
       console.error(error);
+      const errMsg = error.response?.data?.message || error.message || "Unable to generate folder structure script.";
       setMessage({
         type: "error",
-        text: "Unable to generate scaffolding script. Please check your folder structure format.",
+        text: errMsg,
       });
     } finally {
       setLoading(false);
