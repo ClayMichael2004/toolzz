@@ -86,6 +86,38 @@ if (data && data.property) {
 `;
 };
 
+export const generateFallbackReadme = (input) => {
+  return `# Project Documentation
+
+## Overview
+This repository contains application source code and workspace configuration files.
+
+## Features
+- **Modular Architecture**: Designed with modern JavaScript / Node.js best practices.
+- **RESTful Endpoints**: Built with Express framework for high throughput.
+- **Developer Tooling**: Includes automated configuration scripts and deployment setups.
+
+## Getting Started
+
+### Prerequisites
+- Node.js (v18+)
+- npm or yarn
+
+### Installation
+\`\`\`bash
+npm install
+\`\`\`
+
+### Running the Application
+\`\`\`bash
+npm start
+\`\`\`
+
+## License
+ISC License
+`;
+};
+
 export const generateSmartFallback = (tool, input) => {
   if (tool === "commit") {
     return generateFallbackCommitMessage(input);
@@ -96,5 +128,8 @@ export const generateSmartFallback = (tool, input) => {
   if (tool === "scaffold" || tool === "structure") {
     return generateFallbackScaffoldScript(input);
   }
-  return `Processed output for ${tool}:\n\n${input}`;
+  if (tool === "readme") {
+    return generateFallbackReadme(input);
+  }
+  return `### Generated Analysis Output for ${tool}\n\n${input}`;
 };

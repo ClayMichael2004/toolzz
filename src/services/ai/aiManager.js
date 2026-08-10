@@ -71,7 +71,8 @@ export const generateAIResponse = async (prompt, options = {}) => {
   };
 
   const configuredAttempts = attempts.filter(isConfigured);
-  const finalAttempts = configuredAttempts.length > 0 ? configuredAttempts : attempts;
+  const unconfiguredAttempts = attempts.filter((p) => !isConfigured(p));
+  const finalAttempts = Array.from(new Set([...configuredAttempts, ...unconfiguredAttempts]));
 
   for (const providerId of finalAttempts) {
     const driver = PROVIDER_DRIVERS[providerId];
