@@ -27,8 +27,9 @@ export const generateGroqResponse = async (prompt, modelOverride) => {
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
+          "User-Agent": "ToolzzAI/1.0 (Node.js/Express)",
         },
-        timeout: 20000,
+        timeout: 8000,
       }
     );
 

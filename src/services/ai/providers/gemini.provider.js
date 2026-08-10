@@ -31,7 +31,13 @@ export const generateGeminiResponse = async (prompt, modelOverride) => {
             },
           ],
         },
-        { timeout: 15000 }
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "User-Agent": "ToolzzAI/1.0 (Node.js/Express)",
+          },
+          timeout: 8000
+        }
       );
 
       const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text
