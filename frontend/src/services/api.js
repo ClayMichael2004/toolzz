@@ -75,14 +75,26 @@ export const generateAI = async (tool, input, providerOverride) => {
             return resData.data.result.trim();
         }
 
-        // 2. Check alternative text fields (result, readme, text, content, output)
+        // 2. Check direct data string
+        if (typeof resData.data === "string" && resData.data.trim()) {
+            return resData.data.trim();
+        }
+
+        // 3. Check nested data properties
+        if (resData.data && typeof resData.data === "object") {
+            const nestedText = resData.data.text || resData.data.content || resData.data.output || resData.data.readme;
+            if (typeof nestedText === "string" && nestedText.trim()) {
+                return nestedText.trim();
+            }
+        }
+
+        // 4. Check alternative top-level text fields
         const fallbackText = resData.result || resData.readme || resData.text || resData.content || resData.output;
         if (typeof fallbackText === "string" && fallbackText.trim()) {
             return fallbackText.trim();
         }
 
-        // 3. Fallback message return
-        return resData.message || "AI response generated successfully.";
+        throw new Error(resData.message || "AI engine produced an empty response. Please try again.");
     } catch (error) {
         const message = error.response?.data?.message || error.message || "Request failed.";
         throw new Error(message);

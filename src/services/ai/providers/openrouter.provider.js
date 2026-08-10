@@ -11,11 +11,10 @@ export const generateOpenRouterResponse = async (prompt, modelOverride) => {
   const freeModels = [
     modelOverride,
     process.env.OPENROUTER_MODEL,
-    "meta-llama/llama-3.2-11b-vision-instruct:free",
-    "google/gemma-2-9b-it:free",
-    "deepseek/deepseek-r1:free",
-    "qwen/qwen-2.5-coder-32b-instruct:free",
-    "mistralai/mistral-7b-instruct:free"
+    "openrouter/free",
+    "google/gemma-4-26b-a4b-it:free",
+    "cohere/north-mini-code:free",
+    "nvidia/nemotron-nano-9b-v2:free"
   ].filter(Boolean);
 
   let lastError = null;

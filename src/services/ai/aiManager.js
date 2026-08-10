@@ -94,5 +94,5 @@ export const generateAIResponse = async (prompt, options = {}) => {
   }
 
   console.warn(`[AI Engine] All cloud AI providers failed or were quota limited. Activating Smart Fallback Generator. Last error: ${lastError}`);
-  return generateSmartFallback(options.tool, prompt);
+  return generateSmartFallback(options.tool, options.rawInput || prompt);
 };

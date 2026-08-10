@@ -20,7 +20,7 @@ export const handleAIRequest = asyncHandler(
     let result;
 
     try {
-      result = await generateAIResponse(prompt, { provider: selectedProvider, tool });
+      result = await generateAIResponse(prompt, { provider: selectedProvider, tool, rawInput: input });
     } catch (error) {
       console.warn("Cloud AI generation failed, using local smart fallback...", error.message);
       result = generateSmartFallback(tool, input);
