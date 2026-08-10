@@ -34,7 +34,7 @@ function ReadmePage() {
       setLoading(true);
       setNotification({ type: "info", text: "Analyzing codebase & generating README documentation..." });
 
-      const response = await api.post("/readme/generate", formData, {
+      const response = await api.post("readme/generate", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

@@ -1,16 +1,16 @@
 import axios from "axios";
 
 const getBaseURL = () => {
-    // 1. If explicit env variable is set during build or runtime
     if (import.meta.env.VITE_API_URL) {
-        return import.meta.env.VITE_API_URL;
+        const envUrl = import.meta.env.VITE_API_URL;
+        return envUrl.endsWith("/") ? envUrl : envUrl + "/";
     }
-    // 2. In production browser environment (not localhost), use relative path /api
-    if (typeof window !== "undefined" && !window.location.hostname.includes("localhost") && !window.location.hostname.includes("127.0.0.1")) {
-        return "/api";
+    if (typeof window !== "undefined") {
+        if (!window.location.hostname.includes("localhost") && !window.location.hostname.includes("127.0.0.1")) {
+            return `${window.location.protocol}//${window.location.host}/api/`;
+        }
     }
-    // 3. Local development default
-    return "http://localhost:5000/api";
+    return "http://localhost:5000/api/";
 };
 
 const api = axios.create({
@@ -42,7 +42,7 @@ export const setSelectedAgent = (agentId) => {
 
 export const fetchAIProviders = async () => {
     try {
-        const response = await api.get("/ai/providers");
+        const response = await api.get("ai/providers");
         return Array.isArray(response.data?.data) ? response.data.data : [];
     } catch (err) {
         console.warn("Failed to fetch AI providers from backend:", err.message);
@@ -53,7 +53,7 @@ export const fetchAIProviders = async () => {
 export const generateAI = async (tool, input, providerOverride) => {
     const provider = providerOverride || getSelectedAgent();
     try {
-        const response = await api.post("/ai", {
+        const response = await api.post("ai", {
             tool,
             input,
             provider,

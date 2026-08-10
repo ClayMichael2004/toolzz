@@ -37,7 +37,7 @@ const AnalyzerPage = () => {
       setLoading(true);
       setMessage({ type: "info", text: "Performing deep scan on repository architecture, manifests, and safety..." });
 
-      const response = await api.post("/project/upload", formData, {
+      const response = await api.post("project/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
